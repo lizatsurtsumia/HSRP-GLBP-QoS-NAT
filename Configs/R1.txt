@@ -1,0 +1,370 @@
+
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname R1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+!
+!
+!
+!
+ip name-server 8.8.8.8
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+redundancy
+!
+!
+track 1 ip sla 1 reachability
+ delay down 5 up 10
+!
+!
+class-map match-any CM-IN-MGMT
+ match access-group name ACL_MGMT
+class-map match-any CM-IN-SCAVENGER
+ match access-group name SCAVENGER
+class-map match-any CM-IN-SINGALING
+ match access-group name ACL_SIGNALING
+class-map match-any CM-IN-WEB
+ match access-group name WEB
+class-map match-any CM-IN-VOICE
+ match access-group name ACL_VOICE
+!
+policy-map PM-LAN-IN
+ class CM-IN-VOICE
+  set dscp ef
+ class CM-IN-SINGALING
+  set dscp cs3
+ class CM-IN-MGMT
+  set dscp cs2
+ class CM-IN-WEB
+  set dscp af21
+ class CM-IN-SCAVENGER
+  set dscp cs1
+  police cir 128000 conform-action transmit  exceed-action drop 
+ class class-default
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ no shutdown
+ ip address 1.1.1.1 255.255.255.255
+!
+interface Ethernet0/0
+ no shutdown
+ ip address 10.0.13.1 255.255.255.252
+!
+interface Ethernet0/1
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet0/2
+ no shutdown
+ no ip address
+!
+interface Ethernet0/2.10
+ no shutdown
+ encapsulation dot1Q 10
+ ip address 10.10.10.2 255.255.255.0
+ standby version 2
+ standby 10 ip 10.10.10.1
+ standby 10 priority 110
+ standby 10 preempt
+ standby 10 authentication md5 key-string cisco
+ standby 10 name HSRP-USERS
+ standby 10 track 1 decrement 20
+ service-policy input PM-LAN-IN
+!
+interface Ethernet0/2.20
+ no shutdown
+ encapsulation dot1Q 20
+ ip address 10.20.20.2 255.255.255.0
+ glbp 20 ip 10.20.20.1
+ glbp 20 priority 110
+ glbp 20 preempt
+ glbp 20 name GLBP-SERVERS
+ glbp 20 weighting track 1 decrement 20
+ service-policy input PM-LAN-IN
+!
+interface Ethernet0/2.30
+ no shutdown
+ encapsulation dot1Q 30
+ ip address 10.30.30.2 255.255.255.0
+ standby version 2
+ standby 30 ip 10.30.30.1
+ standby 30 authentication md5 key-string cisco
+ standby 30 name HSRP-VOICE
+ service-policy input PM-LAN-IN
+!
+interface Ethernet0/2.99
+ no shutdown
+ encapsulation dot1Q 99 native
+ ip address 10.99.99.2 255.255.255.0
+ standby version 2
+ standby 99 ip 10.99.99.1
+ standby 99 priority 110
+ standby 99 authentication md5 key-string cisco
+ standby 99 name HSRP-MGMT
+ standby 99 track 1 decrement 20
+!
+interface Ethernet0/3
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet1/0
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet1/1
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet1/2
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet1/3
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet2/0
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet2/1
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet2/2
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet2/3
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet3/0
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet3/1
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet3/2
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Ethernet3/3
+ no shutdown
+ no ip address
+ shutdown
+!
+interface Serial4/0
+ no shutdown
+ no ip address
+ serial restart-delay 0
+!
+interface Serial4/1
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial4/2
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial4/3
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial5/0
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial5/1
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial5/2
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial5/3
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial6/0
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial6/1
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial6/2
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial6/3
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial7/0
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial7/1
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial7/2
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+interface Serial7/3
+ no shutdown
+ no ip address
+ shutdown
+ serial restart-delay 0
+!
+router ospf 10
+ router-id 1.1.1.1
+ network 1.1.1.1 0.0.0.0 area 0
+ network 10.0.13.0 0.0.0.3 area 0
+ network 10.0.0.0 0.0.255.255 area 0
+ network 10.10.10.0 0.0.0.255 area 0
+ network 10.20.20.0 0.0.0.255 area 0
+ network 10.30.30.0 0.0.0.255 area 0
+ default-information originate
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 10.0.13.2
+!
+ip access-list extended ACL_MGMT
+ permit tcp any any eq telnet
+ permit tcp any any eq 22
+ip access-list extended ACL_SIGNALING
+ permit tcp any any eq 5060
+ permit udp any any eq 5060
+ip access-list extended ACL_VOICE
+ permit udp 10.30.30.0 0.0.0.255 any
+ip access-list extended SCAVENGER
+ permit icmp 10.20.20.0 0.0.0.255 any
+ip access-list extended WEB
+ permit tcp any any eq www
+ permit tcp any any eq 443
+!
+ip sla 1
+ icmp-echo 10.0.13.2 source-interface Ethernet0/0
+ frequency 5
+ip sla schedule 1 life forever start-time now
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login
+ transport input none
+!
+!
+end
